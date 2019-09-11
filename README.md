@@ -16,6 +16,8 @@ fnStateMachine is an unofficial application that attempts to mirror the function
         * `fn init --runtime node nodefn` to create the default "Hello World" template
         * `fn create app nodeapp` to create the "nodeapp" application that will contain your functions
         * `fn deploy --app nodeapp --local` to deploy your function to the server
+* Please note that a [sample application](https://github.com/fritogotlayed/fnStateMachine-sampleApp) is available that contains a simple testing workflow.
+    * `fn deploy --all --local` can be run from the root directory. Use `fn inspect function testNodeApplication <name>` where the name is `one`, `two`, or `three` and copy the "fnproject.io/fn/invokeEndpoint" into the corresponding "Resource" field in the post body for your system.
 
 ### Other useful commands
 

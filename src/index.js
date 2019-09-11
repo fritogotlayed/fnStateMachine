@@ -26,6 +26,8 @@ const configureRoutes = (expressApp) => {
   expressApp.post('/machine', handlers.createStateMachine);
   expressApp.get('/machine', handlers.listStateMachines);
   expressApp.get('/machine/:id', handlers.getStateMachine);
+  expressApp.post('/machine/:id/invoke', handlers.invokeStateMachine);
+  expressApp.get('/execution/:id', handlers.getDetailsForExecution);
 };
 
 appShutdown.wire();

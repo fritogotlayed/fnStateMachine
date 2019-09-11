@@ -1,5 +1,6 @@
 const { logger } = require('../globals');
 const repos = require('../repos');
+const workers = require('../workers');
 
 const exitHandler = (options, exitCode) => {
   if (options.cleanup) logger.verbose('cleanup');
@@ -7,6 +8,7 @@ const exitHandler = (options, exitCode) => {
   if (options.exit) {
     Promise.resolve(logger.info('Shutting down.'))
       .then(() => repos.handleAppShutdown())
+      .then(() => workers.handleAppShutdown())
       .then(() => process.exit());
   }
 };

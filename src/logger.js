@@ -46,6 +46,7 @@ const buildLogger = (serviceName) => {
     }));
     logger.add(new transports.File({
       filename: './logs/quick-start-debug.log',
+      format: format.simple(),
       level: 'silly',
     }));
   }

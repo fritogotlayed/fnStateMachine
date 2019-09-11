@@ -47,18 +47,19 @@
 * Execution
     * Id      [Text] - The GUID to identify this execution
     * Created [Text] - The datetime this execution was created and thus started
-    * Status  [Text] - The status of the state machine. [Executing, Succeeded, Failed]
+    * Status  [Text] - The status of the state machine. [Pending, Executing, Succeeded, Failed]
     * Version [Text] - Reference to StateMachineVersion
 
-* DelayedTask
+* DelayedOperation
     * Id           [Text] - The GUID to identify this execution
     * InvokeAt     [Text] - The datetime this execution needs to start at or after
     * Version      [Text] - Reference to StateMachineVersion
-    * PreviousTask [Text] - Reference to StateMachineVersion
+    * PreviousOperation [Text] - Reference to StateMachineVersion
 
-* Task
-    * Id        [Text] - The GUID to identify this task
+* Operation
+    * Id        [Text] - The GUID to identify this operation
     * Execution [Text] - Reference to Execution
-    * Created   [Text] - The datetime this task was created and thus started
-    * Input     [Text] - The JSON encoded object used as input for this task
-    * Output    [Text] - The JSON encoded object output from this task
+    * Created   [Text] - The datetime this operation was created and thus started
+    * Status    [Text] - The status of the operation. [Pending, Executing, Succeeded, Failed]
+    * Input     [Text] - The JSON encoded object used as input for this operation
+    * Output    [Text] - The JSON encoded object output from this operation

@@ -3,13 +3,15 @@ const uuid = require('uuid');
 
 const { logger } = require('../../globals');
 
-const createTaskTableSql = `
-CREATE TABLE IF NOT EXISTS Task (
+const createOperationTableSql = `
+CREATE TABLE IF NOT EXISTS Operation (
     id        TEXT PRIMARY KEY,
     execution TEXT NOT NULL,
     created   TEXT NOT NULL,
-    input     TEXT NOT NULL,
-    output    TEXT NOT NULL,
+    stateKey  TEXT NOT NULL,
+    status    TEXT NOT NULL,
+    input     TEXT,
+    output    TEXT,
   FOREIGN KEY (execution) REFERENCES Execution (id) ON DELETE CASCADE
 ) WITHOUT ROWID;
 `;
@@ -52,7 +54,7 @@ const getDb = () => {
       return dbObj.run(createStateMachineVersionTableSql)
         .then(() => dbObj.run(createStateMachineTableSql))
         .then(() => dbObj.run(createExecutionTableSql))
-        .then(() => dbObj.run(createTaskTableSql))
+        .then(() => dbObj.run(createOperationTableSql))
         .then(() => logger.debug('in-memory database initialized.'))
         .then(() => dbObj)
         .catch((err) => {
@@ -78,12 +80,32 @@ const getStateMachine = (db, id) => db.get('SELECT * FROM StateMachine WHERE id 
   .then((stateMachine) => db.get('SELECT * FROM StateMachineVersion WHERE id = ?', [stateMachine.active_version]).then((stateMachineVersion) => ({ stateMachine, stateMachineVersion }))).then((data) => ({
     ...data.stateMachine,
     definition: JSON.parse(data.stateMachineVersion.definition),
-  }));
+  }))
+  .catch((err) => {
+    logger.warn('Error during execution', err);
+  });
 
+const createExecution = (db, id, versionId) => db.run('INSERT INTO Execution VALUES (?, ?, ?, ?)', [id, new Date().toISOString(), 'Pending', versionId]);
+const updateExecution = (db, id, status) => db.run('UPDATE Execution SET status = ? WHERE id = ?', [status, id]);
+const getExecution = (db, id) => db.get('SELECT * FROM Execution WHERE id = ?', [id]);
+const getStateMachineDefinitionForExecution = (db, id) => db.get('SELECT smv.definition FROM Execution AS e JOIN StateMachineVersion AS smv ON e.version = smv.id WHERE e.id = ?', [id]);
+const getDetailsForExecution = (db, id) => db.all('SELECT * FROM Execution AS e JOIN Operation AS t ON e.id = t.execution WHERE e.id = ?', [id]);
+
+const createOperation = (db, id, executionId, stateKey, input) => db.run('INSERT INTO Operation VALUES (?, ?, ?, ?, ?, ?, NULL)', [id, executionId, new Date().toISOString(), stateKey, 'Pending', input]);
+const updateOperation = (db, id, state, output) => db.run('UPDATE Operation SET status = ?, output = ? WHERE id = ?', [state, output, id]);
+const getOperation = (db, id) => db.get('SELECT * FROM Operation WHERE id = ?', [id]);
 
 module.exports = {
   getDb,
   getStateMachines,
   createStateMachine,
   getStateMachine,
+  createExecution,
+  updateExecution,
+  getExecution,
+  getStateMachineDefinitionForExecution,
+  getDetailsForExecution,
+  createOperation,
+  updateOperation,
+  getOperation,
 };

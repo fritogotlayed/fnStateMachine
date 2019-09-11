@@ -1,5 +1,5 @@
 {
-  "name": "fn-tasks",
+  "name": "fn-state-machine",
   "version": "1.0.0",
   "description": "A StepFunctions-like implementation for the fnProject",
   "main": "index.js",
