@@ -2,13 +2,14 @@
 
 * https://github.com/fnproject
 * Actions
-    * create a new fnTask
-    * update the flow of a fnTask
-    * delete a fnTask
-    * list available fnTasks
-    * list executions for a fnTask
-    * list list steps for a fnTask execution
-* Available fnTask States
+    * create a new fnStateMachine
+    * invoke a fnStateMachine
+    * update the flow of a fnStateMachine
+    * delete a fnStateMachine
+    * list available fnStateMachine
+    * list executions for a fnStateMachine
+    * list list steps for a fnStateMachine
+* Available fnStateMachine States
     * [Pass](https://docs.aws.amazon.com/step-functions/latest/dg/amazon-states-language-pass-state.html)
     * [Task](https://docs.aws.amazon.com/step-functions/latest/dg/amazon-states-language-task-state.html)
     * [Choice](https://docs.aws.amazon.com/step-functions/latest/dg/amazon-states-language-choice-state.html)
@@ -48,6 +49,12 @@
     * Created [Text] - The datetime this execution was created and thus started
     * Status  [Text] - The status of the state machine. [Executing, Succeeded, Failed]
     * Version [Text] - Reference to StateMachineVersion
+
+* DelayedTask
+    * Id           [Text] - The GUID to identify this execution
+    * InvokeAt     [Text] - The datetime this execution needs to start at or after
+    * Version      [Text] - Reference to StateMachineVersion
+    * PreviousTask [Text] - Reference to StateMachineVersion
 
 * Task
     * Id        [Text] - The GUID to identify this task

@@ -1,11 +1,13 @@
 const { logger } = require('../globals');
+const repos = require('../repos');
 
 const exitHandler = (options, exitCode) => {
   if (options.cleanup) logger.verbose('cleanup');
   if (options.exitCode || exitCode === 0) logger.verbose(`ExitCode: ${exitCode}`);
   if (options.exit) {
-    logger.info('Shutting down.');
-    process.exit();
+    Promise.resolve(logger.info('Shutting down.'))
+      .then(() => repos.handleAppShutdown())
+      .then(() => process.exit());
   }
 };
 
