@@ -89,7 +89,7 @@ const createExecution = (db, id, versionId) => db.run('INSERT INTO Execution VAL
 const updateExecution = (db, id, status) => db.run('UPDATE Execution SET status = ? WHERE id = ?', [status, id]);
 const getExecution = (db, id) => db.get('SELECT * FROM Execution WHERE id = ?', [id]);
 const getStateMachineDefinitionForExecution = (db, id) => db.get('SELECT smv.definition FROM Execution AS e JOIN StateMachineVersion AS smv ON e.version = smv.id WHERE e.id = ?', [id]);
-const getDetailsForExecution = (db, id) => db.all('SELECT * FROM Execution AS e JOIN Operation AS t ON e.id = t.execution WHERE e.id = ?', [id]);
+const getDetailsForExecution = (db, id) => db.all('SELECT e.status AS executionStatus, o.* FROM Execution AS e JOIN Operation AS o ON e.id = o.execution WHERE e.id = ?', [id]);
 
 const createOperation = (db, id, executionId, stateKey, input) => db.run('INSERT INTO Operation VALUES (?, ?, ?, ?, ?, ?, NULL)', [id, executionId, new Date().toISOString(), stateKey, 'Pending', input]);
 const updateOperation = (db, id, state, output) => db.run('UPDATE Operation SET status = ?, output = ? WHERE id = ?', [state, output, id]);

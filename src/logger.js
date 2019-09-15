@@ -10,6 +10,15 @@ const {
  * @returns {Logger} the logger object
  */
 const buildLogger = (serviceName) => {
+  if (process.env.NODE_ENV && process.env.NODE_ENV.toLowerCase() === 'test') {
+    return createLogger({
+      level: -1,
+      transports: [
+        new transports.Console(),
+      ],
+    });
+  }
+
   const logger = createLogger({
     level: 'info',
     format: format.combine(

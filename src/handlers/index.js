@@ -33,13 +33,14 @@ const getStateMachine = (request, response) => {
 };
 
 const invokeStateMachine = (request, response) => {
-  const { id } = request.params;
+  const { params, body } = request;
+  const { id } = params;
   const executionId = uuid.v4();
   const operationId = uuid.v4();
 
   return repos.getStateMachine(id)
     .then((machine) => repos.createExecution(executionId, machine.active_version)
-      .then(() => repos.createOperation(operationId, executionId, machine.definition.StartAt, request.body))
+      .then(() => repos.createOperation(operationId, executionId, machine.definition.StartAt, body))
       .then(() => workers.enqueueMessage({ executionId, operationId, fromInvoke: true }))
       .then(() => {
         response.send(JSON.stringify({

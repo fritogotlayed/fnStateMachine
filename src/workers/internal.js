@@ -1,11 +1,9 @@
-const uuid = require('uuid');
-
 const { logger, delay } = require('../globals');
 const repos = require('../repos');
 const operations = require('../operations');
 const Queue = require('./queue');
 
-const internalQueueInterval = 1000;
+const internalQueueInterval = 1;
 const batchProcessingSize = 1;
 const internalQueue = new Queue();
 let running = false;

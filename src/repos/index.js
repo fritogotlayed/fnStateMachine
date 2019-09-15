@@ -26,6 +26,7 @@ const initializeSqliteDb = () => {
     getDb().then((db) => sqliteDb.getDetailsForExecution(db, id))
       .then((data) => ({
         id,
+        status: data[0] ? data[0].executionStatus : 'unknown',
         operations: data.map((e) => ({
           id: e.id,
           created: e.created,

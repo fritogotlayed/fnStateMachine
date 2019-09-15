@@ -1,7 +1,7 @@
 const got = require('got');
 const uuid = require('uuid');
 
-const { logger } = require('../globals');
+const globals = require('../globals');
 const repos = require('../repos');
 const enums = require('./enums');
 
@@ -38,8 +38,9 @@ const handleInvokeResponse = (that, response) => {
 };
 
 Task.prototype.run = function run() {
+  const { logger } = globals;
   let body = this.input;
-  if (typeof body === 'object') {
+  if (body && typeof body === 'object') {
     body = JSON.stringify(body);
   }
 
