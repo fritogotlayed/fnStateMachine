@@ -44,6 +44,50 @@ CREATE TABLE IF NOT EXISTS StateMachine (
 ) WITHOUT ROWID;
 `;
 
+const mapTypeForReturn = (typeString, data) => {
+  switch (typeString) {
+    case 'object':
+      if (data) {
+        return JSON.parse(data);
+      }
+      return null;
+    case 'boolean':
+      return Boolean(data);
+    case 'number':
+      return Number(data);
+    case 'string':
+      return data;
+    case null:
+      return data;
+    default:
+      logger.warn('Encountered unknown map type. Returning data as-is.', typeString);
+      return data;
+  }
+};
+
+const mapTypeForStorage = (data) => {
+  if (data === null) {
+    return {
+      type: 'object',
+      data: null,
+    };
+  }
+
+  const type = typeof data;
+  switch (type) {
+    case 'object':
+      return {
+        type,
+        data: JSON.stringify(data),
+      };
+    default:
+      return {
+        type,
+        data,
+      };
+  }
+};
+
 let internalDb;
 const getDb = () => {
   if (!internalDb) {
@@ -97,26 +141,66 @@ const createExecution = (db, id, versionId) => db.run('INSERT INTO Execution VAL
 });
 const updateExecution = (db, id, status) => db.run('UPDATE Execution SET status = $status WHERE id = $id', { $status: status, $id: id });
 const getExecution = (db, id) => db.get('SELECT * FROM Execution WHERE id = $id', { $id: id });
-const getStateMachineDefinitionForExecution = (db, id) => db.get('SELECT smv.definition FROM Execution AS e JOIN StateMachineVersion AS smv ON e.version = smv.id WHERE e.id = $executionId', { $executionId: id });
-const getDetailsForExecution = (db, id) => db.all('SELECT e.status AS executionStatus, o.* FROM Execution AS e JOIN Operation AS o ON e.id = o.execution WHERE e.id = $executionId', { $executionId: id });
+const getStateMachineDefinitionForExecution = (db, id) => db.get('SELECT smv.definition FROM Execution AS e JOIN StateMachineVersion AS smv ON e.version = smv.id WHERE e.id = $executionId', { $executionId: id })
+  .then((result) => JSON.parse(result.definition));
+const getDetailsForExecution = (db, id) => db.all('SELECT e.status AS executionStatus, o.* FROM Execution AS e JOIN Operation AS o ON e.id = o.execution WHERE e.id = $executionId', { $executionId: id })
+  .then((results) => ({
+    id,
+    status: results[0] ? results[0].executionStatus : 'unknown',
+    operations: results.map((e) => {
+      const inputData = mapTypeForReturn(e.inputType, e.input);
+      const outputData = mapTypeForReturn(e.outputType, e.output);
+      return {
+        id: e.id,
+        created: e.created,
+        status: e.status,
+        stateKey: e.stateKey,
+        input: inputData,
+        output: outputData,
+      };
+    }),
+  }));
 
-const createOperation = (db, id, executionId, stateKey, input) => db.run('INSERT INTO Operation VALUES ($id, $executionId, $created, $stateKey, $status, $input, $inputType, $output, $outputType)', {
-  $id: id,
-  $executionId: executionId,
-  $created: new Date().toISOString(),
-  $stateKey: stateKey,
-  $status: 'Pending',
-  $input: input,
-  $inputType: null,
-  $output: null,
-  $outputType: null,
-});
-const updateOperation = (db, id, status, output) => db.run('UPDATE Operation SET status = $status, output = $output WHERE id = $id', {
-  $status: status,
-  $output: output,
-  $id: id,
-});
-const getOperation = (db, id) => db.get('SELECT * FROM Operation WHERE id = $id', { $id: id });
+const createOperation = (db, id, executionId, stateKey, input) => {
+  const inputMap = mapTypeForStorage(input);
+  return db.run('INSERT INTO Operation VALUES ($id, $executionId, $created, $stateKey, $status, $input, $inputType, $output, $outputType)', {
+    $id: id,
+    $executionId: executionId,
+    $created: new Date().toISOString(),
+    $stateKey: stateKey,
+    $status: 'Pending',
+    $input: inputMap.data,
+    $inputType: inputMap.type,
+    $output: null,
+    $outputType: null,
+  });
+};
+const updateOperation = (db, id, status, output) => {
+  const outputMap = mapTypeForStorage(output);
+  return db.run('UPDATE Operation SET status = $status, output = $output, outputType = $outputType WHERE id = $id', {
+    $status: status,
+    $output: outputMap.data,
+    $outputType: outputMap.type,
+    $id: id,
+  });
+};
+const getOperation = (db, id) => db.get('SELECT * FROM Operation WHERE id = $id', { $id: id })
+  .then((result) => {
+    const inputMap = mapTypeForReturn(result.inputType, result.input);
+    const outputMap = mapTypeForReturn(result.outputType, result.output);
+    const {
+      execution, created, stateKey, status,
+    } = result;
+    return {
+      id,
+      execution,
+      created,
+      stateKey,
+      status,
+      input: inputMap,
+      output: outputMap,
+    };
+  });
 
 module.exports = {
   getDb,

@@ -2,28 +2,7 @@ const uuid = require('uuid');
 
 const repos = require('../repos');
 const enums = require('./enums');
-
-/* Comparison Operators
-    And
-    BooleanEquals
-    Not
-    NumericEquals
-    NumericGreaterThan
-    NumericGreaterThanEquals
-    NumericLessThan
-    NumericLessThanEquals
-    Or
-    StringEquals
-    StringGreaterThan
-    StringGreaterThanEquals
-    StringLessThan
-    StringLessThanEquals
-    TimestampEquals
-    TimestampGreaterThan
-    TimestampGreaterThanEquals
-    TimestampLessThan
-    TimestampLessThanEquals
- */
+const { logger } = require('../globals');
 
 function Choice(definition, metadata) {
   if (definition.Type !== 'Choice') throw new Error(`Attempted to use ${definition.Type} type for "Choice".`);
@@ -49,41 +28,86 @@ function getValueFromPath(source, path) {
   return tempSource;
 }
 
+function performTest(operation, choice, input) {
+  switch (operation) {
+    case 'BooleanEquals':
+    case 'StringEquals':
+    case 'NumericEquals':
+    case 'TimestampEquals':
+      return getValueFromPath(input, choice.Variable) === choice[operation];
+
+    case 'NumericGreaterThan':
+    case 'StringGreaterThan':
+    case 'TimestampGreaterThan':
+      return getValueFromPath(input, choice.Variable) > choice[operation];
+
+    case 'NumericGreaterThanEquals':
+    case 'StringGreaterThanEquals':
+    case 'TimestampGreaterThanEquals':
+      return getValueFromPath(input, choice.Variable) >= choice[operation];
+
+    case 'NumericLessThan':
+    case 'StringLessThan':
+    case 'TimestampLessThan':
+      return getValueFromPath(input, choice.Variable) < choice[operation];
+
+    case 'NumericLessThanEquals':
+    case 'StringLessThanEquals':
+    case 'TimestampLessThanEquals':
+      return getValueFromPath(input, choice.Variable) <= choice[operation];
+
+    default:
+      throw Error(`Condition ${operation} not yet implemented.`);
+  }
+}
+
 function processChoice(that) {
   const {
     choices,
     defaultOption,
+    input,
   } = that;
   let next = null;
+  const checks = [
+    'And',
+    'BooleanEquals',
+    'Not',
+    'NumericEquals',
+    'NumericGreaterThan',
+    'NumericGreaterThanEquals',
+    'NumericLessThan',
+    'NumericLessThanEquals',
+    'Or',
+    'StringEquals',
+    'StringGreaterThan',
+    'StringGreaterThanEquals',
+    'StringLessThan',
+    'StringLessThanEquals',
+    'TimestampEquals',
+    'TimestampGreaterThan',
+    'TimestampGreaterThanEquals',
+    'TimestampLessThan',
+    'TimestampLessThanEquals',
+  ];
 
-  choices.forEach((choice) => {
-    if (next) return;
-
-    if (Object.prototype.hasOwnProperty.call(choice, 'BooleanEquals')) {
-      const value = choice.BooleanEquals;
-      const variable = getValueFromPath(that.input, choice.Variable);
-
-      if (value === variable) {
+  for (let i = 0; i < choices.length; i += 1) {
+    const choice = choices[i];
+    if (next) break;
+    for (let j = 0; j < checks.length; j += 1) {
+      const check = checks[j];
+      if (Object.prototype.hasOwnProperty.call(choice, check)
+          && performTest(check, choice, input)) {
         next = choice.Next;
+        break;
       }
     }
-  });
+  }
 
   return next || defaultOption;
 }
 
 Choice.prototype.run = function run() {
   this.output = this.input;
-  if (this.input) {
-    try {
-      this.input = JSON.parse(this.input);
-    } catch (e) {
-      // Ignore any errors from attempting to parse the input.
-    }
-  }
-  if (typeof this.output === 'object') {
-    this.output = JSON.stringify(this.output);
-  }
 
   const nextOpId = uuid.v4();
   const {
@@ -99,13 +123,22 @@ Choice.prototype.run = function run() {
       next = nextStateKey;
       if (next) {
         repos.createOperation(nextOpId, executionId, next, output);
+        repos.updateOperation(operationId, enums.STATUS.Succeeded, output);
+      } else {
+        repos.updateOperation(operationId, enums.STATUS.Failed);
+        repos.updateExecution(executionId, enums.STATUS.Failed);
       }
     })
     .then(() => ({
       nextOpId,
       output,
       next,
-    }));
+    }))
+    .catch((err) => {
+      logger.warn('Failed processing choice step.', { executionId, operationId, err });
+      repos.updateOperation(operationId, enums.STATUS.Failed);
+      repos.updateExecution(executionId, enums.STATUS.Failed);
+    });
 };
 
 module.exports = Choice;

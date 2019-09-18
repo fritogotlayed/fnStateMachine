@@ -113,7 +113,7 @@ describe('operations', () => {
           // Assert
           chai.expect(updateOperationStub.getCalls().length).to.be.equal(1);
           chai.expect(updateExecutionStub.getCalls().length).to.be.equal(1);
-          chai.expect(updateOperationStub.getCall(0).args).to.be.eql(['operationId', enums.STATUS.Succeeded, '{"a":1,"b":2}']);
+          chai.expect(updateOperationStub.getCall(0).args).to.be.eql(['operationId', enums.STATUS.Succeeded, metadata.input]);
           chai.expect(updateExecutionStub.getCall(0).args).to.be.eql(['executionId', enums.STATUS.Failed]);
         });
       });

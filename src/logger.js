@@ -4,6 +4,16 @@ const {
 } = require('winston');
 /* eslint-enable no-unused-vars */
 
+const OneMegabyte = 1048576;
+
+const buildFileOptions = (opts) => {
+  const defaults = {
+    maxsize: OneMegabyte,
+    maxFiles: 3,
+  };
+  return { ...defaults, ...opts };
+};
+
 /**
  * Creates a new logger object.
  * @param {string} serviceName Optional name to give the logger.
@@ -35,8 +45,8 @@ const buildLogger = (serviceName) => {
       // - Write to all logs with level `info` and below to `quick-start-combined.log`.
       // - Write all logs error (and below) to `quick-start-error.log`.
       //
-      new transports.File({ filename: './logs/quick-start-error.log', level: 'error' }),
-      new transports.File({ filename: './logs/quick-start-combined.log' }),
+      new transports.File(buildFileOptions({ filename: './logs/quick-start-error.log', level: 'error' })),
+      new transports.File(buildFileOptions({ filename: './logs/quick-start-combined.log' })),
     ],
   });
 
@@ -53,11 +63,11 @@ const buildLogger = (serviceName) => {
       ),
       level: 'silly',
     }));
-    logger.add(new transports.File({
+    logger.add(new transports.File(buildFileOptions({
       filename: './logs/quick-start-debug.log',
       format: format.simple(),
       level: 'silly',
-    }));
+    })));
   }
 
   logger.debug('Created new logger.');

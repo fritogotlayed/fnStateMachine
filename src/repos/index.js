@@ -2,7 +2,6 @@
 // repository such as this module. Implementation details should be hidden from
 // callers to make supporting different stores as easy as possible.
 const sqliteDb = require('./sqlite3/db');
-const { logger } = require('../globals');
 
 const initializeSqliteDb = () => {
   const getDb = () => sqliteDb.getDb();
@@ -20,39 +19,14 @@ const initializeSqliteDb = () => {
     getDb().then((db) => sqliteDb.updateExecution(db, id, status)));
   const getExecution = (id) => getDb().then((db) => sqliteDb.getExecution(db, id));
   const getStateMachineDefinitionForExecution = (id) => (
-    getDb().then((db) => sqliteDb.getStateMachineDefinitionForExecution(db, id))
-      .then((data) => JSON.parse(data.definition)));
+    getDb().then((db) => sqliteDb.getStateMachineDefinitionForExecution(db, id)));
   const getDetailsForExecution = (id) => (
-    getDb().then((db) => sqliteDb.getDetailsForExecution(db, id))
-      .then((data) => ({
-        id,
-        status: data[0] ? data[0].executionStatus : 'unknown',
-        operations: data.map((e) => ({
-          id: e.id,
-          created: e.created,
-          status: e.status,
-          stateKey: e.stateKey,
-          input: e.input,
-          output: e.output,
-        })),
-      })));
+    getDb().then((db) => sqliteDb.getDetailsForExecution(db, id)));
 
-  const createOperation = (id, executionId, stateKey, input) => {
-    logger.verbose('Creating operation', { id, executionId });
-    let normalizedInput = input;
-    if (typeof input === 'object') {
-      normalizedInput = JSON.stringify(input);
-    }
-    return getDb().then((db) => (
-      sqliteDb.createOperation(db, id, executionId, stateKey, normalizedInput)));
-  };
-  const updateOperation = (id, state, output) => {
-    let normalizedOutput = output;
-    if (typeof output === 'object') {
-      normalizedOutput = JSON.stringify(output);
-    }
-    return getDb().then((db) => sqliteDb.updateOperation(db, id, state, normalizedOutput));
-  };
+  const createOperation = (id, executionId, stateKey, input) => (
+    getDb().then((db) => sqliteDb.createOperation(db, id, executionId, stateKey, input)));
+  const updateOperation = (id, state, output) => (
+    getDb().then((db) => sqliteDb.updateOperation(db, id, state, output)));
   const getOperation = (id) => getDb().then((db) => sqliteDb.getOperation(db, id));
 
   return {

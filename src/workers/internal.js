@@ -3,7 +3,7 @@ const repos = require('../repos');
 const operations = require('../operations');
 const Queue = require('./queue');
 
-const internalQueueInterval = 1;
+const internalQueueInterval = 50;
 const batchProcessingSize = 1;
 const internalQueue = new Queue();
 let running = false;
