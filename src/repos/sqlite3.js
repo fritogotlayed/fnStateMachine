@@ -122,6 +122,11 @@ const createStateMachine = (db, id, name, definitionObject) => {
   return db.run('INSERT INTO StateMachineVersion VALUES ($id, $definition)', { $id: versionId, $definition: JSON.stringify(definitionObject) })
     .then(() => db.run('INSERT INTO StateMachine VALUES ($id, $name, $active_version)', { $id: id, $name: name, $active_version: versionId }));
 };
+const updateStateMachine = (db, id, definitionObject) => {
+  const versionId = uuid.v4();
+  return db.run('INSERT INTO StateMachineVersion VALUES ($id, $definition)', { $id: versionId, $definition: JSON.stringify(definitionObject) })
+    .then(() => db.run('UPDATE StateMachine SET active_version = $active_version WHERE id = $id', { $id: id, $active_version: versionId }));
+};
 
 const getStateMachine = (db, id) => db.get('SELECT * FROM StateMachine WHERE id = $id', { $id: id })
   .then((stateMachine) => db.get('SELECT * FROM StateMachineVersion WHERE id = $id', { $id: stateMachine.active_version })
@@ -208,6 +213,7 @@ module.exports = {
   getStateMachines,
   createStateMachine,
   getStateMachine,
+  updateStateMachine,
   createExecution,
   updateExecution,
   getExecution,

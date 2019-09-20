@@ -17,7 +17,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"Name\": \"test\",\n  \"StartAt\": \"One\",\n  \"States\": {\n  \t\"One\": {\n  \t\t\"Type\": \"Task\",\n  \t\t\"Resource\": \"http://localhost:8080/invoke/01DMG7X2G5NG8G00GZJ0000004\",\n  \t\t\"Catch\": [\n  \t\t\t{ \"ErrorEquals\": [\"States.ALL\"], \"Next\": \"Fail\"}\n  \t\t],\n  \t\t\"Next\": \"Two\"\n  \t},\n  \t\"Two\": {\n  \t\t\"Type\": \"Task\",\n  \t\t\"Resource\": \"http://localhost:8080/invoke/01DMG7VGWBNG8G00GZJ0000002\",\n  \t\t\"Catch\": [\n  \t\t\t{ \"ErrorEquals\": [\"States.ALL\"], \"Next\": \"Fail\"}\n  \t\t],\n  \t\t\"Next\": \"Three\"\n  \t},\n  \t\"Three\": {\n  \t\t\"Type\": \"Task\",\n  \t\t\"Resource\": \"http://localhost:8080/invoke/01DMG7W9P6NG8G00GZJ0000003\",\n  \t\t\"Catch\": [\n  \t\t\t{ \"ErrorEquals\": [\"States.ALL\"], \"Next\": \"Fail\"}\n  \t\t],\n  \t\t\"Next\": \"Success\"\n  \t},\n  \t\"Fail\": {\n  \t\t\"Type\": \"Fail\"\n  \t},\n  \t\"Success\": {\n  \t\t\"Type\": \"Succeed\"\n  \t}\n  }\n}\n\n"
+					"raw": "{\n  \"Name\": \"test\",\n  \"StartAt\": \"One\",\n  \"States\": {\n  \t\"One\": {\n  \t\t\"Type\": \"Task\",\n  \t\t\"Resource\": \"http://localhost:8080/invoke/01DMG7X2G5NG8G00GZJ0000004\",\n  \t\t\"Catch\": [\n  \t\t\t{ \"ErrorEquals\": [\"States.ALL\"], \"Next\": \"Fail\"}\n  \t\t],\n  \t\t\"Next\": \"CheckShouldFail\"\n  \t},\n  \t\"CheckShouldFail\": {\n  \t\t\"Type\": \"Choice\",\n  \t\t\"Choices\": [\n  \t\t\t{\n  \t\t\t\t\"Variable\": \"$.shouldFail\",\n  \t\t\t\t\"BooleanEquals\": true,\n  \t\t\t\t\"Next\": \"Fail\"\n  \t\t\t}\n  \t\t],\n  \t\t\"Default\": \"Two\"\n  \t},\n  \t\"Two\": {\n  \t\t\"Type\": \"Task\",\n  \t\t\"Resource\": \"http://localhost:8080/invoke/01DMG7VGWBNG8G00GZJ0000002\",\n  \t\t\"Catch\": [\n  \t\t\t{ \"ErrorEquals\": [\"States.ALL\"], \"Next\": \"Fail\"}\n  \t\t],\n  \t\t\"Next\": \"Three\"\n  \t},\n  \t\"Three\": {\n  \t\t\"Type\": \"Task\",\n  \t\t\"Resource\": \"http://localhost:8080/invoke/01DMG7W9P6NG8G00GZJ0000003\",\n  \t\t\"Catch\": [\n  \t\t\t{ \"ErrorEquals\": [\"States.ALL\"], \"Next\": \"Fail\"}\n  \t\t],\n  \t\t\"Next\": \"Success\"\n  \t},\n  \t\"Fail\": {\n  \t\t\"Type\": \"Fail\"\n  \t},\n  \t\"Success\": {\n  \t\t\"Type\": \"Succeed\"\n  \t}\n  }\n}\n\n"
 				},
 				"url": {
 					"raw": "http://127.0.0.1:8888/machine",
@@ -52,7 +52,7 @@
 					"raw": "{\n  \"name\": \"test1\"\n}\n\n"
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8888/machine",
+					"raw": "http://127.0.0.1:8888/machines",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -62,7 +62,7 @@
 					],
 					"port": "8888",
 					"path": [
-						"machine"
+						"machines"
 					]
 				}
 			},
@@ -157,6 +157,38 @@
 					"path": [
 						"execution",
 						"db3825b7-416e-4045-bd9a-7b0eb9e17b9f"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update State Machine",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"Name\": \"test\",\n  \"StartAt\": \"One\",\n  \"States\": {\n  \t\"One\": {\n  \t\t\"Type\": \"Task\",\n  \t\t\"Resource\": \"http://localhost:8080/invoke/01DMG7X2G5NG8G00GZJ0000004\",\n  \t\t\"Catch\": [\n  \t\t\t{ \"ErrorEquals\": [\"States.ALL\"], \"Next\": \"Fail\"}\n  \t\t],\n  \t\t\"Next\": \"CheckShouldFail\"\n  \t},\n  \t\"CheckShouldFail\": {\n  \t\t\"Type\": \"Choice\",\n  \t\t\"Choices\": [\n  \t\t\t{\n  \t\t\t\t\"Variable\": \"$.shouldFail\",\n  \t\t\t\t\"BooleanEquals\": true,\n  \t\t\t\t\"Next\": \"Fail\"\n  \t\t\t}\n  \t\t],\n  \t\t\"Default\": \"Two\"\n  \t},\n  \t\"Two\": {\n  \t\t\"Type\": \"Task\",\n  \t\t\"Resource\": \"http://localhost:8080/invoke/01DMG7VGWBNG8G00GZJ0000002\",\n  \t\t\"Catch\": [\n  \t\t\t{ \"ErrorEquals\": [\"States.ALL\"], \"Next\": \"Fail\"}\n  \t\t],\n  \t\t\"Next\": \"Three\"\n  \t},\n  \t\"Three\": {\n  \t\t\"Type\": \"Task\",\n  \t\t\"Resource\": \"http://localhost:8080/invoke/01DMG7W9P6NG8G00GZJ0000003\",\n  \t\t\"Catch\": [\n  \t\t\t{ \"ErrorEquals\": [\"States.ALL\"], \"Next\": \"Fail\"}\n  \t\t],\n  \t\t\"Next\": \"Success\"\n  \t},\n  \t\"Fail\": {\n  \t\t\"Type\": \"Fail\"\n  \t},\n  \t\"Success\": {\n  \t\t\"Type\": \"Succeed\"\n  \t}\n  }\n}\n\n"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8888/machine/869f62bb-5eae-4e96-a678-5ef0bcbd7d41",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8888",
+					"path": [
+						"machine",
+						"869f62bb-5eae-4e96-a678-5ef0bcbd7d41"
 					]
 				}
 			},

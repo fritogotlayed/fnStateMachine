@@ -12,6 +12,8 @@ const initializeSqliteDb = () => {
   const createStateMachine = (id, name, definition) => getDb()
     .then((db) => sqliteDb.createStateMachine(db, id, name, definition));
   const getStateMachine = (id) => getDb().then((db) => sqliteDb.getStateMachine(db, id));
+  const updateStateMachine = (id, definition) => getDb()
+    .then((db) => sqliteDb.updateStateMachine(db, id, definition));
 
   const createExecution = (id, versionId) => (
     getDb().then((db) => sqliteDb.createExecution(db, id, versionId)));
@@ -34,6 +36,7 @@ const initializeSqliteDb = () => {
     getStateMachines,
     createStateMachine,
     getStateMachine,
+    updateStateMachine,
     createExecution,
     updateExecution,
     getExecution,

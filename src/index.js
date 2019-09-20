@@ -23,10 +23,13 @@ const configureRoutes = (expressApp) => {
     res.send('Hello World!');
   });
 
+  expressApp.get('/machines', handlers.listStateMachines);
+
   expressApp.post('/machine', handlers.createStateMachine);
-  expressApp.get('/machine', handlers.listStateMachines);
+  expressApp.post('/machine/:id', handlers.updateStateMachine);
   expressApp.get('/machine/:id', handlers.getStateMachine);
   expressApp.post('/machine/:id/invoke', handlers.invokeStateMachine);
+
   expressApp.get('/execution/:id', handlers.getDetailsForExecution);
 };
 

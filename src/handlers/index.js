@@ -2,6 +2,7 @@ const uuid = require('uuid');
 
 const repos = require('../repos');
 const workers = require('../workers');
+const { logger } = require('../globals');
 
 const listStateMachines = (request, response) => repos.getStateMachines().then((result) => {
   response.send(JSON.stringify(result));
@@ -13,6 +14,21 @@ const createStateMachine = (request, response) => {
     response.send(JSON.stringify({
       uuid: machineId,
     }));
+  });
+};
+
+const updateStateMachine = (request, response) => {
+  const { params, body } = request;
+  const { id } = params;
+
+  return repos.updateStateMachine(id, body).then(() => {
+    response.send(JSON.stringify({
+      uuid: id,
+    }));
+  }).catch((err) => {
+    logger.warn('Error updating state machine', err);
+    response.status(500);
+    response.send();
   });
 };
 
@@ -69,4 +85,5 @@ module.exports = {
   getStateMachine,
   invokeStateMachine,
   getDetailsForExecution,
+  updateStateMachine,
 };
