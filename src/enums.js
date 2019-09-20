@@ -1,4 +1,4 @@
-const STATUS = {
+const OP_STATUS = {
   Pending: 'Pending',
   Executing: 'Executing',
   Succeeded: 'Succeeded',
@@ -6,5 +6,5 @@ const STATUS = {
 };
 
 module.exports = {
-  STATUS,
+  OP_STATUS,
 };

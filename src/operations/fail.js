@@ -1,5 +1,5 @@
 const repos = require('../repos');
-const enums = require('./enums');
+const enums = require('../enums');
 
 function Fail(definition, metadata) {
   if (definition.Type !== 'Fail') throw new Error(`Attempted to use ${definition.Type} type for "Fail".`);
@@ -23,8 +23,8 @@ Fail.prototype.run = function run() {
     executionId,
   } = this;
 
-  return repos.updateOperation(operationId, enums.STATUS.Succeeded, output)
-    .then(() => repos.updateExecution(executionId, enums.STATUS.Failed))
+  return repos.updateOperation(operationId, enums.OP_STATUS.Succeeded, output)
+    .then(() => repos.updateExecution(executionId, enums.OP_STATUS.Failed))
     .then(() => ({ output }));
 };
 

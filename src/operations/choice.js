@@ -1,7 +1,7 @@
 const uuid = require('uuid');
 
 const repos = require('../repos');
-const enums = require('./enums');
+const enums = require('../enums');
 const { logger } = require('../globals');
 
 function Choice(definition, metadata) {
@@ -117,16 +117,16 @@ Choice.prototype.run = function run() {
   } = this;
   let next;
 
-  return repos.updateOperation(operationId, enums.STATUS.Executing)
+  return repos.updateOperation(operationId, enums.OP_STATUS.Executing)
     .then(() => processChoice(this))
     .then((nextStateKey) => {
       next = nextStateKey;
       if (next) {
         repos.createOperation(nextOpId, executionId, next, output);
-        repos.updateOperation(operationId, enums.STATUS.Succeeded, output);
+        repos.updateOperation(operationId, enums.OP_STATUS.Succeeded, output);
       } else {
-        repos.updateOperation(operationId, enums.STATUS.Failed);
-        repos.updateExecution(executionId, enums.STATUS.Failed);
+        repos.updateOperation(operationId, enums.OP_STATUS.Failed);
+        repos.updateExecution(executionId, enums.OP_STATUS.Failed);
       }
     })
     .then(() => ({
@@ -136,8 +136,8 @@ Choice.prototype.run = function run() {
     }))
     .catch((err) => {
       logger.warn('Failed processing choice step.', { executionId, operationId, err });
-      repos.updateOperation(operationId, enums.STATUS.Failed);
-      repos.updateExecution(executionId, enums.STATUS.Failed);
+      repos.updateOperation(operationId, enums.OP_STATUS.Failed);
+      repos.updateExecution(executionId, enums.OP_STATUS.Failed);
     });
 };
 

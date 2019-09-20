@@ -1,5 +1,5 @@
 const repos = require('../repos');
-const enums = require('./enums');
+const enums = require('../enums');
 
 function Succeed(definition, metadata) {
   if (definition.Type !== 'Succeed') throw new Error(`Attempted to use ${definition.Type} type for "Succeed".`);
@@ -20,8 +20,8 @@ Succeed.prototype.run = function run() {
     executionId,
   } = this;
 
-  return repos.updateOperation(operationId, enums.STATUS.Succeeded, output)
-    .then(() => repos.updateExecution(executionId, enums.STATUS.Succeeded))
+  return repos.updateOperation(operationId, enums.OP_STATUS.Succeeded, output)
+    .then(() => repos.updateExecution(executionId, enums.OP_STATUS.Succeeded))
     .then(() => ({ output }));
 };
 

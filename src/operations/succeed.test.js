@@ -1,7 +1,7 @@
 const chai = require('chai');
 const sinon = require('sinon');
 
-const enums = require('./enums');
+const enums = require('../enums');
 const repos = require('../repos');
 const Succeed = require('./succeed');
 
@@ -50,8 +50,8 @@ describe('operations', () => {
           // Assert
           chai.expect(updateOperationStub.getCalls().length).to.be.equal(1);
           chai.expect(updateExecutionStub.getCalls().length).to.be.equal(1);
-          chai.expect(updateOperationStub.getCall(0).args).to.be.eql(['operationId', enums.STATUS.Succeeded, undefined]);
-          chai.expect(updateExecutionStub.getCall(0).args).to.be.eql(['executionId', enums.STATUS.Succeeded]);
+          chai.expect(updateOperationStub.getCall(0).args).to.be.eql(['operationId', enums.OP_STATUS.Succeeded, undefined]);
+          chai.expect(updateExecutionStub.getCall(0).args).to.be.eql(['executionId', enums.OP_STATUS.Succeeded]);
         });
       });
 
@@ -71,8 +71,8 @@ describe('operations', () => {
           // Assert
           chai.expect(updateOperationStub.getCalls().length).to.be.equal(1);
           chai.expect(updateExecutionStub.getCalls().length).to.be.equal(1);
-          chai.expect(updateOperationStub.getCall(0).args).to.be.eql(['operationId', enums.STATUS.Succeeded, null]);
-          chai.expect(updateExecutionStub.getCall(0).args).to.be.eql(['executionId', enums.STATUS.Succeeded]);
+          chai.expect(updateOperationStub.getCall(0).args).to.be.eql(['operationId', enums.OP_STATUS.Succeeded, null]);
+          chai.expect(updateExecutionStub.getCall(0).args).to.be.eql(['executionId', enums.OP_STATUS.Succeeded]);
         });
       });
 
@@ -92,8 +92,8 @@ describe('operations', () => {
           // Assert
           chai.expect(updateOperationStub.getCalls().length).to.be.equal(1);
           chai.expect(updateExecutionStub.getCalls().length).to.be.equal(1);
-          chai.expect(updateOperationStub.getCall(0).args).to.be.eql(['operationId', enums.STATUS.Succeeded, 'abc']);
-          chai.expect(updateExecutionStub.getCall(0).args).to.be.eql(['executionId', enums.STATUS.Succeeded]);
+          chai.expect(updateOperationStub.getCall(0).args).to.be.eql(['operationId', enums.OP_STATUS.Succeeded, 'abc']);
+          chai.expect(updateExecutionStub.getCall(0).args).to.be.eql(['executionId', enums.OP_STATUS.Succeeded]);
         });
       });
 
@@ -113,8 +113,8 @@ describe('operations', () => {
           // Assert
           chai.expect(updateOperationStub.getCalls().length).to.be.equal(1);
           chai.expect(updateExecutionStub.getCalls().length).to.be.equal(1);
-          chai.expect(updateOperationStub.getCall(0).args).to.be.eql(['operationId', enums.STATUS.Succeeded, metadata.input]);
-          chai.expect(updateExecutionStub.getCall(0).args).to.be.eql(['executionId', enums.STATUS.Succeeded]);
+          chai.expect(updateOperationStub.getCall(0).args).to.be.eql(['operationId', enums.OP_STATUS.Succeeded, metadata.input]);
+          chai.expect(updateExecutionStub.getCall(0).args).to.be.eql(['executionId', enums.OP_STATUS.Succeeded]);
         });
       });
     });

@@ -2,6 +2,7 @@ const sqlite = require('sqlite');
 const uuid = require('uuid');
 
 const { logger } = require('../globals');
+const enums = require('../enums');
 
 const createOperationTableSql = `
 CREATE TABLE IF NOT EXISTS Operation (
@@ -136,7 +137,7 @@ const getStateMachine = (db, id) => db.get('SELECT * FROM StateMachine WHERE id 
 const createExecution = (db, id, versionId) => db.run('INSERT INTO Execution VALUES ($id, $created, $status, $version)', {
   $id: id,
   $created: new Date().toISOString(),
-  $status: 'Pending',
+  $status: enums.OP_STATUS.Pending,
   $version: versionId,
 });
 const updateExecution = (db, id, status) => db.run('UPDATE Execution SET status = $status WHERE id = $id', { $status: status, $id: id });
@@ -168,7 +169,7 @@ const createOperation = (db, id, executionId, stateKey, input) => {
     $executionId: executionId,
     $created: new Date().toISOString(),
     $stateKey: stateKey,
-    $status: 'Pending',
+    $status: enums.OP_STATUS.Pending,
     $input: inputMap.data,
     $inputType: inputMap.type,
     $output: null,

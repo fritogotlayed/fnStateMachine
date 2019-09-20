@@ -3,7 +3,7 @@ const uuid = require('uuid');
 
 const globals = require('../globals');
 const repos = require('../repos');
-const enums = require('./enums');
+const enums = require('../enums');
 
 function Task(definition, metadata) {
   if (definition.Type !== 'Task') throw new Error(`Attempted to use ${definition.Type} type for "Task".`);
@@ -28,7 +28,7 @@ const handleInvokeResponse = (that, response) => {
     executionId,
   } = that;
 
-  return repos.updateOperation(operationId, enums.STATUS.Succeeded, output)
+  return repos.updateOperation(operationId, enums.OP_STATUS.Succeeded, output)
     .then(() => next && repos.createOperation(nextOpId, executionId, next, output))
     .then(() => ({
       nextOpId,
@@ -52,7 +52,7 @@ Task.prototype.run = function run() {
     body,
   };
 
-  return repos.updateOperation(this.operationId, enums.STATUS.Executing)
+  return repos.updateOperation(this.operationId, enums.OP_STATUS.Executing)
     .then(() => got.post(this.resource, postOptions))
     .then((resp) => handleInvokeResponse(this, resp));
 };
