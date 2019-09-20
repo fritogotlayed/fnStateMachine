@@ -1,8 +1,9 @@
 const OP_STATUS = {
-  Pending: 'Pending',
   Executing: 'Executing',
-  Succeeded: 'Succeeded',
   Failed: 'Failed',
+  Pending: 'Pending',
+  Succeeded: 'Succeeded',
+  Waiting: 'Waiting',
 };
 
 module.exports = {

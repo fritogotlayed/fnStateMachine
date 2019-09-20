@@ -29,7 +29,11 @@ const initializeSqliteDb = () => {
     getDb().then((db) => sqliteDb.createOperation(db, id, executionId, stateKey, input)));
   const updateOperation = (id, state, output) => (
     getDb().then((db) => sqliteDb.updateOperation(db, id, state, output)));
+  const delayOperation = (id, waitUtilUtc) => (
+    getDb().then((db) => sqliteDb.delayOperation(db, id, waitUtilUtc)));
   const getOperation = (id) => getDb().then((db) => sqliteDb.getOperation(db, id));
+  const getDelayedOperations = (waitUtilUtc) => (
+    getDb().then((db) => sqliteDb.getDelayedOperations(db, waitUtilUtc)));
 
   return {
     handleAppShutdown,
@@ -44,7 +48,9 @@ const initializeSqliteDb = () => {
     getDetailsForExecution,
     createOperation,
     updateOperation,
+    delayOperation,
     getOperation,
+    getDelayedOperations,
   };
 };
 

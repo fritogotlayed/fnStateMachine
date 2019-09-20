@@ -2,6 +2,7 @@ const { logger, delay } = require('../globals');
 const repos = require('../repos');
 const operations = require('../operations');
 const Queue = require('./queue');
+const enums = require('../enums');
 
 const internalQueueInterval = 50;
 const batchProcessingSize = 1;
@@ -10,11 +11,13 @@ let running = false;
 const handleAppShutdown = () => { running = false; };
 
 const handleOpCompleted = (operationId, executionId, runData) => {
-  const { output, nextOpId, next } = runData;
-  logger.verbose(`Operation ${operationId} completed. Output: ${JSON.stringify(output)}.`);
-  repos.updateOperation(operationId, 'Succeeded', output)
-    .then(() => next && internalQueue.enqueue({ executionId, operationId: nextOpId }))
-    .catch((err) => logger.warn('set up next operation failed', err));
+  if (runData) {
+    const { output, nextOpId, next } = runData;
+    logger.verbose(`Operation ${operationId} completed. Output: ${JSON.stringify(output)}.`);
+    repos.updateOperation(operationId, 'Succeeded', output)
+      .then(() => next && internalQueue.enqueue({ executionId, operationId: nextOpId }))
+      .catch((err) => logger.warn('set up next operation failed', err));
+  }
 };
 
 const buildOperationDataBundle = (metadata) => (
@@ -59,12 +62,28 @@ const processMessages = () => {
   }
 };
 
+const enqueueDelayedMessages = () => {
+  repos.getDelayedOperations(new Date().toISOString()).then((allDelayed) => {
+    allDelayed.forEach((delayed) => repos.updateOperation(delayed.id, enums.OP_STATUS.Pending)
+      .then(() => internalQueue.enqueue({
+        executionId: delayed.execution,
+        operationId: delayed.id,
+      })));
+  });
+  // .then(() => next && internalQueue.enqueue({ executionId, operationId: nextOpId }))
+
+  if (running) {
+    delay(internalQueueInterval).then(() => enqueueDelayedMessages());
+  }
+};
+
 const enqueueMessage = (message) => internalQueue.enqueue(message);
 
 const startWorker = () => {
   if (!running) {
     running = true;
     delay(internalQueueInterval).then(() => processMessages());
+    delay(internalQueueInterval).then(() => enqueueDelayedMessages());
   }
 };
 

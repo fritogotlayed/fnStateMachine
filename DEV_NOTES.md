@@ -50,12 +50,6 @@
     * Status  [Text] - The status of the state machine. [Pending, Executing, Succeeded, Failed]
     * Version [Text] - Reference to StateMachineVersion
 
-* DelayedOperation
-    * Id           [Text] - The GUID to identify this execution
-    * InvokeAt     [Text] - The datetime this execution needs to start at or after
-    * Version      [Text] - Reference to StateMachineVersion
-    * PreviousOperation [Text] - Reference to StateMachineVersion
-
 * Operation
     * Id        [Text] - The GUID to identify this operation
     * Execution [Text] - Reference to Execution

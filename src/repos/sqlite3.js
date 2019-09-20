@@ -6,15 +6,16 @@ const enums = require('../enums');
 
 const createOperationTableSql = `
 CREATE TABLE IF NOT EXISTS Operation (
-    id         TEXT PRIMARY KEY,
-    execution  TEXT NOT NULL,
-    created    TEXT NOT NULL,
-    stateKey   TEXT NOT NULL,
-    status     TEXT NOT NULL,
-    input      TEXT,
-    inputType  TEXT,
-    output     TEXT,
-    outputType Text,
+    id           TEXT PRIMARY KEY,
+    execution    TEXT NOT NULL,
+    created      TEXT NOT NULL,
+    stateKey     TEXT NOT NULL,
+    status       TEXT NOT NULL,
+    input        TEXT,
+    inputType    TEXT,
+    output       TEXT,
+    outputType   TEXT,
+    waitUntilUtc TEXT,
   FOREIGN KEY (execution) REFERENCES Execution (id) ON DELETE CASCADE
 ) WITHOUT ROWID;
 `;
@@ -67,7 +68,7 @@ const mapTypeForReturn = (typeString, data) => {
 };
 
 const mapTypeForStorage = (data) => {
-  if (data === null) {
+  if (data === null || data === undefined) {
     return {
       type: 'object',
       data: null,
@@ -115,7 +116,7 @@ const getDb = () => {
   return Promise.resolve(db);
 };
 
-const getStateMachines = (db) => db.all('SELECT * FROM StateMachine').then((results) => results);
+const getStateMachines = (db) => db.all('SELECT * FROM StateMachine');
 
 const createStateMachine = (db, id, name, definitionObject) => {
   const versionId = uuid.v4();
@@ -169,7 +170,7 @@ const getDetailsForExecution = (db, id) => db.all('SELECT e.status AS executionS
 
 const createOperation = (db, id, executionId, stateKey, input) => {
   const inputMap = mapTypeForStorage(input);
-  return db.run('INSERT INTO Operation VALUES ($id, $executionId, $created, $stateKey, $status, $input, $inputType, $output, $outputType)', {
+  return db.run('INSERT INTO Operation VALUES ($id, $executionId, $created, $stateKey, $status, $input, $inputType, $output, $outputType, NULL)', {
     $id: id,
     $executionId: executionId,
     $created: new Date().toISOString(),
@@ -190,12 +191,17 @@ const updateOperation = (db, id, status, output) => {
     $id: id,
   });
 };
+const delayOperation = (db, id, waitUntilUtc) => db.run('UPDATE Operation SET status = $status, waitUntilUtc = $waitUntilUtc WHERE id = $id', {
+  $status: enums.OP_STATUS.Waiting,
+  $waitUntilUtc: waitUntilUtc,
+  $id: id,
+});
 const getOperation = (db, id) => db.get('SELECT * FROM Operation WHERE id = $id', { $id: id })
   .then((result) => {
     const inputMap = mapTypeForReturn(result.inputType, result.input);
     const outputMap = mapTypeForReturn(result.outputType, result.output);
     const {
-      execution, created, stateKey, status,
+      execution, created, stateKey, status, waitUntilUtc,
     } = result;
     return {
       id,
@@ -205,8 +211,13 @@ const getOperation = (db, id) => db.get('SELECT * FROM Operation WHERE id = $id'
       status,
       input: inputMap,
       output: outputMap,
+      waitUntilUtc,
     };
   });
+const getDelayedOperations = (db, waitUntilUtc) => db.all('SELECT * FROM Operation WHERE status = $status AND waitUntilUtc < $waitUntilUtc', {
+  $status: enums.OP_STATUS.Waiting,
+  $waitUntilUtc: waitUntilUtc,
+});
 
 module.exports = {
   getDb,
@@ -221,5 +232,7 @@ module.exports = {
   getDetailsForExecution,
   createOperation,
   updateOperation,
+  delayOperation,
   getOperation,
+  getDelayedOperations,
 };

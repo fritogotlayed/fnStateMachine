@@ -2,6 +2,7 @@ const Task = require('./task');
 const Succeed = require('./succeed');
 const Fail = require('./fail');
 const Choice = require('./choice');
+const Wait = require('./wait');
 
 const getOperation = (definition, metadata) => {
   const { stateKey } = metadata;
@@ -15,6 +16,8 @@ const getOperation = (definition, metadata) => {
       return new Fail(currentState, metadata);
     case 'Choice':
       return new Choice(currentState, metadata);
+    case 'Wait':
+      return new Wait(currentState, metadata);
     default:
       break;
   }
