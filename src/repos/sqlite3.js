@@ -1,7 +1,7 @@
 const sqlite = require('sqlite');
 const uuid = require('uuid');
 
-const { logger } = require('../../globals');
+const { logger } = require('../globals');
 
 const createOperationTableSql = `
 CREATE TABLE IF NOT EXISTS Operation (

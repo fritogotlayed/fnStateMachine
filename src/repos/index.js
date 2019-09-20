@@ -1,7 +1,7 @@
 // All interactions with any storage mechanism should go through a "top level"
 // repository such as this module. Implementation details should be hidden from
 // callers to make supporting different stores as easy as possible.
-const sqliteDb = require('./sqlite3/db');
+const sqliteDb = require('./sqlite3');
 
 const initializeSqliteDb = () => {
   const getDb = () => sqliteDb.getDb();
