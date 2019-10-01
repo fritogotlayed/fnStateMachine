@@ -2,6 +2,9 @@
   "name": "fn-state-machine",
   "version": "1.0.0",
   "description": "A StepFunctions-like implementation for the fnProject",
+  "repository": {
+    "url": "https://github.com/fritogotlayed/fnStateMachine"
+  },
   "main": "index.js",
   "scripts": {
     "start": "node ./src/index.js",

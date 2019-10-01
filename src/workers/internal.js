@@ -6,7 +6,15 @@ const enums = require('../enums');
 
 const internalQueueInterval = 50;
 const batchProcessingSize = 1;
+
+// This is the general queue that new invocations from the HTTP endpoints are sent to.
+// They are lesser priority than in-flight work.
 const internalQueue = new Queue();
+
+// This is the queue for executions that are currently in flight. We try to get executions
+// that are mid flight out the way before starting "pending" work.
+const inFlightQueue = new Queue();
+
 let running = false;
 const handleAppShutdown = () => { running = false; };
 
@@ -15,7 +23,7 @@ const handleOpCompleted = (operationId, executionId, runData) => {
     const { output, nextOpId, next } = runData;
     logger.verbose(`Operation ${operationId} completed. Output: ${JSON.stringify(output)}.`);
     repos.updateOperation(operationId, 'Succeeded', output)
-      .then(() => next && internalQueue.enqueue({ executionId, operationId: nextOpId }))
+      .then(() => next && inFlightQueue.enqueue({ executionId, operationId: nextOpId }))
       .catch((err) => logger.warn('set up next operation failed', err));
   }
 };
@@ -48,8 +56,16 @@ const processMessage = (message) => {
 };
 
 const processMessages = () => {
+  let count = 0;
+  if (inFlightQueue.size() > 0) {
+    while (count < batchProcessingSize && inFlightQueue.size() > 0) {
+      const message = inFlightQueue.dequeue();
+      processMessage(message);
+      count += 1;
+    }
+  }
+
   if (internalQueue.size() > 0) {
-    let count = 0;
     while (count < batchProcessingSize && internalQueue.size() > 0) {
       const message = internalQueue.dequeue();
       processMessage(message);
@@ -65,7 +81,7 @@ const processMessages = () => {
 const enqueueDelayedMessages = () => {
   repos.getDelayedOperations(new Date().toISOString()).then((allDelayed) => {
     allDelayed.forEach((delayed) => repos.updateOperation(delayed.id, enums.OP_STATUS.Pending)
-      .then(() => internalQueue.enqueue({
+      .then(() => inFlightQueue.enqueue({
         executionId: delayed.execution,
         operationId: delayed.id,
       })));
